@@ -1,9 +1,5 @@
 package buruh
 
-import (
-	"log"
-)
-
 type Dispatcher struct {
 	config     *Config
 	jobs       *Queue
@@ -44,7 +40,7 @@ func (d *Dispatcher) run() {
 			case <-d.stopSignal:
 				return
 			default:
-				err := d.exec()
+				err := d.collect()
 				if err != nil {
 					continue
 				}
@@ -55,23 +51,18 @@ func (d *Dispatcher) run() {
 
 }
 
-func (d *Dispatcher) exec() (err error) {
+func (d *Dispatcher) collect() (err error) {
 	job, err := d.jobs.Dequeue()
 	if err != nil {
 		return
 	}
 
-	if d.config.Debug {
-		log.Println("Waiting for available worker")
-	}
-
-	worker := d.pool.Get()
-
-	go worker.Start(job, d.pool.workers)
+	d.pool.submit(job)
 
 	return
 }
 
 func (d *Dispatcher) Stop() {
 	d.stopSignal <- true
+	d.pool.Stop()
 }

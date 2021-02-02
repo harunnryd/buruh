@@ -13,7 +13,7 @@ import (
 var fn = func(id int, wg *sync.WaitGroup) buruh.Task {
 	return func(ctx context.Context) {
 		rand.Seed(time.Now().UnixNano())
-		n := rand.Intn(2)
+		n := rand.Intn(1)
 		time.Sleep(time.Duration(n) * time.Second)
 
 		wKey := ctx.Value(buruh.CtxWorkerKey).(string)
@@ -26,11 +26,12 @@ var fn = func(id int, wg *sync.WaitGroup) buruh.Task {
 
 func main() {
 	dispatcher := buruh.New(&buruh.Config{
-		MaxWorkerNum: 10000,
-		MinWorkerNum: 50,
+		MaxWorkerNum: 1000,
+		MinWorkerNum: 100,
+		Debug:        false,
 	})
 
-	numOfJob := 50000
+	numOfJob := 5000
 	wg := sync.WaitGroup{}
 	wg.Add(numOfJob)
 
