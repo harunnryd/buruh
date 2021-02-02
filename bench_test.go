@@ -35,7 +35,7 @@ func BenchmarkWithoutBuruh(b *testing.B) {
 
 func BenchmarkWithBuruh(b *testing.B) {
 	dispatcher := buruh.New(&buruh.Config{
-		MaxWorkerNum: 50,
+		MaxWorkerNum: 100,
 		MinWorkerNum: 20,
 	})
 

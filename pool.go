@@ -1,6 +1,7 @@
 package buruh
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"sync/atomic"
@@ -71,6 +72,8 @@ func (p *Pool) addNewWorker() {
 func (p *Pool) Stop() {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(p.workers))
+
+	fmt.Println("Total workers: ", len(p.workers))
 
 	for _, w := range p.workers {
 		w.Stop(wg)

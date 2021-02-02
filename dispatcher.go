@@ -1,19 +1,20 @@
 package buruh
 
 type Dispatcher struct {
-	config     *Config
-	jobs       *Queue
+	config *Config
+	// jobs       *Queue
+	jobQueue   chan Job
 	pool       *Pool
 	stopSignal chan bool
 }
 
 func New(cfg *Config) *Dispatcher {
-	q := NewQueue(cfg)
+	// q := NewQueue(cfg)
 	p := NewPool(cfg)
 
 	d := &Dispatcher{
 		config:     cfg,
-		jobs:       q,
+		jobQueue:   make(chan Job),
 		pool:       p,
 		stopSignal: make(chan bool),
 	}
@@ -25,7 +26,8 @@ func New(cfg *Config) *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch(job Job) {
-	d.jobs.Enqueue(job)
+	//d.jobs.Enqueue(job)
+	d.jobQueue <- job
 }
 
 func (d *Dispatcher) Debug(t bool) *Dispatcher {
@@ -39,12 +41,10 @@ func (d *Dispatcher) run() {
 			select {
 			case <-d.stopSignal:
 				return
+			case job := <-d.jobQueue:
+				d.pool.submit(job)
 			default:
-				err := d.collect()
-				if err != nil {
-					continue
-				}
-
+				continue
 			}
 		}
 	}()
@@ -52,10 +52,7 @@ func (d *Dispatcher) run() {
 }
 
 func (d *Dispatcher) collect() (err error) {
-	job, err := d.jobs.Dequeue()
-	if err != nil {
-		return
-	}
+	job := <-d.jobQueue
 
 	d.pool.submit(job)
 

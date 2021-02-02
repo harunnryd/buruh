@@ -60,6 +60,8 @@ func (w *Worker) Start(jobChan <-chan Job) {
 
 			w.stopSignal <- true
 			return
+		default:
+			continue
 		}
 
 	}
